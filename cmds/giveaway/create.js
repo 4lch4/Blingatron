@@ -1,20 +1,6 @@
 const { Command } = require('discord.js-commando')
 
-const replies = {
-  step1: ':ring: Let\'s get this show on the road!\n\nWhich channel would you like to host the giveaway in?',
-  step2: channelId => {
-    return `:ring: Sounds like the giveaway is going to be in <#${channelId}>.\n\n` +
-      'Now, how many minutes long should the giveaway last?'
-  },
-  step3: timeLimit => {
-    return `:ring: This giveaway will last **${timeLimit}** minute(s).\n\n` +
-      'Next, how many winners will there be? (1 - 10)'
-  },
-  step4: winnerCount => {
-    return `:ring: ${winnerCount} winner(s) it is!\n\n` +
-      'Lastly, what is the prize for the giveaway?'
-  }
-}
+const replies = require('../../util/replies')
 
 module.exports = class Create extends Command {
   constructor (client) {
@@ -29,19 +15,19 @@ module.exports = class Create extends Command {
   }
 
   async run (message) {
-    message.channel.send(replies.step1)
+    message.channel.send(replies.create.step1)
 
     const channelId = await collectChannelId(message)
     if (!channelId) message.channel.send('The channel you provided was invalid. Please be sure to mention a valid channel.')
-    else message.channel.send(replies.step2(channelId))
+    else message.channel.send(replies.create.step2(channelId))
 
     const timeLimit = await collectTimeLimit(message)
     if (!timeLimit) message.channel.send('Please be sure to enter a valid number, no alphabetic characters or symbols are allowed.')
-    else message.channel.send(replies.step3(timeLimit))
+    else message.channel.send(replies.create.step3(timeLimit))
 
     const winnerCount = await collectWinnerCount(message)
     if (!winnerCount) message.channel.send('Please be sure to enter a valid number between 1 and 10.')
-    else message.channel.send(replies.step4(winnerCount))
+    else message.channel.send(replies.create.step4(winnerCount))
 
     const giveawayPrize = await collectGiveawayPrize(message)
     if (!giveawayPrize) message.channel.send('Please be sure to provide a prize.')
