@@ -35,7 +35,7 @@ module.exports = class Create extends Command {
   }
 }
 
-function baseCollector (message) {
+function Collector (message) {
   return message.channel.createMessageCollector(msg =>
     msg.member.id === message.member.id &&
     msg.channel.id === message.channel.id,
@@ -43,7 +43,7 @@ function baseCollector (message) {
 }
 
 async function collectChannelId (message) {
-  const collector = baseCollector(message)
+  const collector = Collector(message)
   let attempts = 0
 
   return new Promise((resolve, reject) => {
@@ -63,7 +63,7 @@ async function collectChannelId (message) {
 }
 
 async function collectTimeLimit (message) {
-  const collector = baseCollector(message)
+  const collector = Collector(message)
   let attempts = 0
 
   return new Promise((resolve, reject) => {
@@ -83,7 +83,7 @@ async function collectTimeLimit (message) {
 }
 
 async function collectWinnerCount (message) {
-  const collector = baseCollector(message)
+  const collector = Collector(message)
   let attempts = 0
 
   return new Promise((resolve, reject) => {
@@ -103,7 +103,7 @@ async function collectWinnerCount (message) {
 }
 
 async function collectGiveawayPrize (message) {
-  const collector = baseCollector(message)
+  const collector = Collector(message)
 
   return new Promise((resolve, reject) => {
     collector.on('collect', (msg, c) => {
