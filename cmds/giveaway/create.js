@@ -1,6 +1,11 @@
 const { Command } = require('discord.js-commando')
+const reload = require('require-reload')(require)
 
-const replies = require('../../util/replies')
+const path = require('path')
+const fs = require('fs')
+
+const SetupStep = require('./setup_steps/SetupStep')  // Used for JSDoc
+const stepsPath = path.join(__dirname, './setup_steps')
 
 module.exports = class Create extends Command {
   constructor (client) {
@@ -15,108 +20,58 @@ module.exports = class Create extends Command {
   }
 
   async run (message) {
-    message.channel.send(replies.create.step1)
+    const setupSteps = await getSetupSteps()
+    let responses = []
 
-    const channelId = await collectChannelId(message)
-    if (!channelId) {
-      message.channel.send('The channel you provided was invalid. Please be sure to mention a valid channel.')
-      return
-    } else message.channel.send(replies.create.step2(channelId))
+    for (let x = 0; x < setupSteps.length; x++) {
+      const step = setupSteps[x]
+      const response = responses[x]
 
-    const timeLimit = await collectTimeLimit(message)
-    if (!timeLimit) {
-      message.channel.send('Please be sure to enter a valid number, no alphabetic characters or symbols are allowed.')
-      return
-    } else message.channel.send(replies.create.step3(timeLimit))
+      try {
+        message.channel.send(step.beginningPrompt(response))
+        responses[x + 1] = await step.collectResponse(message)
+      } catch (err) {
+        console.log(err)
+      }
+    }
 
-    const winnerCount = await collectWinnerCount(message)
-    if (!winnerCount) {
-      message.channel.send('Please be sure to enter a valid number between 1 and 10.')
-      return
-    } else message.channel.send(replies.create.step4(winnerCount))
-
-    const giveawayPrize = await collectGiveawayPrize(message)
-    if (!giveawayPrize) message.channel.send('Please be sure to provide a prize.')
-    else message.channel.send(`:tada: The giveaway for the \`${giveawayPrize}\` will last for **${timeLimit}** minutes in <#${channelId}>!`)
+    message.channel.send(`:tada: The giveaway for the \`${responses[4]}\` will last for **${responses[2]}** minutes in <#${responses[1]}>!`)
   }
 }
 
-function Collector (message) {
-  return message.channel.createMessageCollector(msg =>
-    msg.member.id === message.member.id &&
-    msg.channel.id === message.channel.id,
-    { time: 60000 })
+/**
+ * Sorts the given steps by their stepNum property and returns the array using
+ * a promise.
+ *
+ * @param {SetupStep[]} steps
+ */
+async function sortSetupSteps (steps) {
+  let newSteps = []
+
+  for (let step of steps) {
+    newSteps[step.stepNum - 1] = step
+  }
+
+  return Promise.resolve(newSteps)
 }
 
-async function collectChannelId (message) {
-  const collector = Collector(message)
-  let attempts = 0
+/**
+ * Reads the setup_steps directory to get available step files, excluding the
+ * base SetupStep.js class. They're placed into an array sorted by step number
+ * and returned using a promise.
+ */
+async function getSetupSteps () {
+  const steps = fs.readdirSync(stepsPath)
+  let setupSteps = []
 
-  return new Promise((resolve, reject) => {
-    collector.on('collect', (msg, c) => {
-      // Verify message content is a mentioned channel
-      if (/^<#\d+>/.test(msg.content)) {
-        collector.stop()
-        resolve(msg.content.slice(2, msg.content.indexOf('>')))
-      } else if (attempts++ === 2) {
-        collector.stop()
-        resolve(false)
-      }
-    })
+  for (let x = 0; x < steps.length; x++) {
+    let stepInc = steps[x]
 
-    collector.on('end', (c, r) => { if (r === 'time') resolve(false) })
-  })
-}
+    if (stepInc !== 'SetupStep.js') {
+      let Step = reload(path.join(stepsPath, stepInc))
+      setupSteps.push(new Step())
+    }
+  }
 
-async function collectTimeLimit (message) {
-  const collector = Collector(message)
-  let attempts = 0
-
-  return new Promise((resolve, reject) => {
-    collector.on('collect', (msg, c) => {
-      // Verify message content is a number
-      if (/^\d+/.test(msg.content)) {
-        collector.stop()
-        resolve(msg.content)
-      } else if (attempts++ === 2) {
-        collector.stop()
-        resolve(false)
-      }
-    })
-
-    collector.on('end', (c, r) => { if (r === 'time') resolve(false) })
-  })
-}
-
-async function collectWinnerCount (message) {
-  const collector = Collector(message)
-  let attempts = 0
-
-  return new Promise((resolve, reject) => {
-    collector.on('collect', (msg, c) => {
-      // Verify message content is a number between 1 and 10
-      if (/^\d+/.test(msg.content) && msg.content > 0 && msg.content < 11) {
-        collector.stop()
-        resolve(msg.content)
-      } else if (attempts++ === 2) {
-        collector.stop()
-        resolve(false)
-      }
-    })
-
-    collector.on('end', (c, r) => { if (r === 'time') resolve(false) })
-  })
-}
-
-async function collectGiveawayPrize (message) {
-  const collector = Collector(message)
-
-  return new Promise((resolve, reject) => {
-    collector.on('collect', (msg, c) => {
-      collector.stop()
-      resolve(msg.content)
-    })
-
-    collector.on('end', (c, r) => { if (r === 'time') resolve(false) })
-  })
+  return sortSetupSteps(setupSteps)
 }
