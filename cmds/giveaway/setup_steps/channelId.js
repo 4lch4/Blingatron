@@ -4,8 +4,8 @@ module.exports = class ChannelId extends SetupStep {
   get stepNum () { return 1 }
 
   beginningPrompt (input) {
-    console.log(`ehhh`)
-    return ':ring: Let\'s get this show on the road!\n\nWhich channel would you like to host the giveaway in?'
+    return ':ring: Let\'s get this show on the road!\n\n' +
+      'Which channel would you like to host the giveaway in?'
   }
 
   async collectResponse (message) {
@@ -27,7 +27,7 @@ module.exports = class ChannelId extends SetupStep {
         }
       })
 
-      collector.on('end', (c, r) => { if (r === 'time') resolve(false) })
+      collector.on('end', (c, r) => { if (r === 'time') reject(new Error(this.timeoutPrompt())) })
     })
   }
 }

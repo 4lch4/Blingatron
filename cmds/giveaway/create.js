@@ -23,19 +23,19 @@ module.exports = class Create extends Command {
     const setupSteps = await getSetupSteps()
     let responses = []
 
-    for (let x = 0; x < setupSteps.length; x++) {
-      const step = setupSteps[x]
-      const response = responses[x]
+    try {
+      for (let x = 0; x < setupSteps.length; x++) {
+        const step = setupSteps[x]
+        const response = responses[x - 1]
 
-      try {
         message.channel.send(step.beginningPrompt(response))
-        responses[x + 1] = await step.collectResponse(message)
-      } catch (err) {
-        console.log(err)
+        responses[x] = await step.collectResponse(message)
       }
-    }
 
-    message.channel.send(`:tada: The giveaway for the \`${responses[4]}\` will last for **${responses[2]}** minutes in <#${responses[1]}>!`)
+      message.channel.send(`:tada: The giveaway for the \`${responses[3]}\` will last for **${responses[1]}** minutes in <#${responses[0]}>!`)
+    } catch (err) {
+      message.channel.send(err.message)
+    }
   }
 }
 

@@ -4,6 +4,8 @@ module.exports = class WinnerCount extends SetupStep {
   get stepNum () { return 2 }
 
   beginningPrompt (channelId) {
+    if (!channelId) throw new Error('The channel you provided was invalid. please be sure to mention a valid channel.')
+
     return `:ring: Sounds like the giveaway is going to be in <#${channelId}>.\n\n` +
       'Now, how many minutes long should the giveaway last?'
   }
@@ -27,7 +29,7 @@ module.exports = class WinnerCount extends SetupStep {
         }
       })
 
-      collector.on('end', (c, r) => { if (r === 'time') resolve(false) })
+      collector.on('end', (c, r) => { if (r === 'time') reject(new Error(this.timeoutPrompt())) })
     })
   }
 }

@@ -4,6 +4,8 @@ module.exports = class TimeLimit extends SetupStep {
   get stepNum () { return 3 }
 
   beginningPrompt (timeLimit) {
+    if (!timeLimit) throw new Error('The time limit you entered was invalid.')
+
     return `:ring: This giveaway will last **${timeLimit}** minute(s).\n\n` +
       'Next, how many winners will there be? (1 - 10)'
   }
@@ -27,7 +29,7 @@ module.exports = class TimeLimit extends SetupStep {
         }
       })
 
-      collector.on('end', (c, r) => { if (r === 'time') resolve(false) })
+      collector.on('end', (c, r) => { if (r === 'time') reject(new Error(this.timeoutPrompt())) })
     })
   }
 }
