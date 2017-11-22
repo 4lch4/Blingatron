@@ -18,16 +18,22 @@ module.exports = class Create extends Command {
     message.channel.send(replies.create.step1)
 
     const channelId = await collectChannelId(message)
-    if (!channelId) message.channel.send('The channel you provided was invalid. Please be sure to mention a valid channel.')
-    else message.channel.send(replies.create.step2(channelId))
+    if (!channelId) {
+      message.channel.send('The channel you provided was invalid. Please be sure to mention a valid channel.')
+      return
+    } else message.channel.send(replies.create.step2(channelId))
 
     const timeLimit = await collectTimeLimit(message)
-    if (!timeLimit) message.channel.send('Please be sure to enter a valid number, no alphabetic characters or symbols are allowed.')
-    else message.channel.send(replies.create.step3(timeLimit))
+    if (!timeLimit) {
+      message.channel.send('Please be sure to enter a valid number, no alphabetic characters or symbols are allowed.')
+      return
+    } else message.channel.send(replies.create.step3(timeLimit))
 
     const winnerCount = await collectWinnerCount(message)
-    if (!winnerCount) message.channel.send('Please be sure to enter a valid number between 1 and 10.')
-    else message.channel.send(replies.create.step4(winnerCount))
+    if (!winnerCount) {
+      message.channel.send('Please be sure to enter a valid number between 1 and 10.')
+      return
+    } else message.channel.send(replies.create.step4(winnerCount))
 
     const giveawayPrize = await collectGiveawayPrize(message)
     if (!giveawayPrize) message.channel.send('Please be sure to provide a prize.')
