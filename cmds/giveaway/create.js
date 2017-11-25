@@ -21,6 +21,10 @@ module.exports = class Create extends Command {
 
   async run (message) {
     const setupSteps = await getSetupSteps()
+    const collector = message.channel.createMessageCollector(msg =>
+      msg.member.id === message.member.id &&
+      msg.channel.id === message.channel.id,
+      { time: 60000 })
     let responses = []
 
     try {
@@ -29,7 +33,7 @@ module.exports = class Create extends Command {
         const response = responses[x - 1]
 
         message.channel.send(step.beginningPrompt(response))
-        responses[x] = await step.collectResponse(message)
+        responses[x] = await step.collectResponse(message, collector)
       }
 
       message.channel.send(`:tada: The giveaway for the \`${responses[3]}\` will last for **${responses[1]}** minutes in <#${responses[0]}>!`)

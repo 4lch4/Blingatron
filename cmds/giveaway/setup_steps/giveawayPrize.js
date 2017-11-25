@@ -10,15 +10,9 @@ module.exports = class GiveawayPrize extends SetupStep {
       'Lastly, what is the prize for the giveaway?'
   }
 
-  async collectResponse (message) {
-    const collector = message.channel.createMessageCollector(msg =>
-      msg.member.id === message.member.id &&
-      msg.channel.id === message.channel.id,
-      { time: 60000 })
-
+  collectResponse (message, collector) {
     return new Promise((resolve, reject) => {
       collector.on('collect', (msg, c) => {
-        collector.stop()
         resolve(msg.content)
       })
 

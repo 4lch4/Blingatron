@@ -8,21 +8,15 @@ module.exports = class ChannelId extends SetupStep {
       'Which channel would you like to host the giveaway in?'
   }
 
-  async collectResponse (message) {
-    const collector = message.channel.createMessageCollector(msg =>
-      msg.member.id === message.member.id &&
-      msg.channel.id === message.channel.id,
-      { time: 60000 })
+  collectResponse (message, collector) {
     let attempts = 0
 
     return new Promise((resolve, reject) => {
       collector.on('collect', (msg, c) => {
         // Verify message content is a mentioned channel
         if (/^<#\d+>/.test(msg.content)) {
-          collector.stop()
           resolve(msg.content.slice(2, msg.content.indexOf('>')))
         } else if (attempts++ === 2) {
-          collector.stop()
           resolve(false)
         }
       })
