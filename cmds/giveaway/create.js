@@ -28,15 +28,16 @@ module.exports = class Create extends Command {
     let responses = []
 
     try {
-      for (let x = 0; x < setupSteps.length; x++) {
-        const step = setupSteps[x]
-        const response = responses[x - 1]
+      for (let step of setupSteps) {
+        const response = responses[step.stepNum - 1]   // Response from previous question
 
-        message.channel.send(step.beginningPrompt(response))
-        responses[x] = await step.collectResponse(message, collector)
+        await step.beginningPrompt(message, response)
+        responses[step.stepNum] = await step.collectResponse(message, collector)
       }
 
-      message.channel.send(`:tada: The giveaway for the \`${responses[3]}\` will last for **${responses[1]}** minutes in <#${responses[0]}>!`)
+      collector.stop()
+
+      message.channel.send(`:tada: The giveaway for the \`${responses[4]}\` will last for **${responses[2]}** minutes in <#${responses[1]}>!`)
     } catch (err) {
       message.channel.send(err.message)
     }
