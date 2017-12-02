@@ -2,7 +2,7 @@ const { Command } = require('discord.js-commando')
 const reload = require('require-reload')(require)
 
 const path = require('path')
-const fs = require('fs')
+const fs = require('fs-extra')
 
 const SetupStep = require('./setup_steps/SetupStep')  // Used for JSDoc
 const stepsPath = path.join(__dirname, './setup_steps')
@@ -64,18 +64,21 @@ async function sortSetupSteps (steps) {
  * base SetupStep.js class. They're placed into an array sorted by step number
  * and returned using a promise.
  */
-async function getSetupSteps () {
-  const steps = fs.readdirSync(stepsPath)
-  let setupSteps = []
+function getSetupSteps () {
+  return new Promise((resolve, reject) => {
+    fs.readdir(stepsPath).then(steps => {
+      let setupSteps = []
 
-  for (let x = 0; x < steps.length; x++) {
-    let stepInc = steps[x]
+      for (let x = 0; x < steps.length; x++) {
+        let stepInc = steps[x]
 
-    if (stepInc !== 'SetupStep.js') {
-      let Step = reload(path.join(stepsPath, stepInc))
-      setupSteps.push(new Step())
-    }
-  }
+        if (stepInc !== 'SetupStep.js') {
+          let Step = reload(path.join(stepsPath, stepInc))
+          setupSteps.push(new Step())
+        }
+      }
 
-  return sortSetupSteps(setupSteps)
+      resolve(sortSetupSteps(setupSteps))
+    })
+  })
 }
