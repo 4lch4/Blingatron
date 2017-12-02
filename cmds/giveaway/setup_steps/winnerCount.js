@@ -3,11 +3,13 @@ const SetupStep = require('./SetupStep')
 module.exports = class WinnerCount extends SetupStep {
   get stepNum () { return 2 }
 
-  beginningPrompt (channelId) {
-    if (!channelId) throw new Error('The channel you provided was invalid. please be sure to mention a valid channel.')
+  async beginningPrompt (message, channelId) {
+    if (!channelId) return Promise.reject(new Error('The channel you provided was invalid. please be sure to mention a valid channel.'))
 
-    return `:ring: Sounds like the giveaway is going to be in <#${channelId}>.\n\n` +
+    return message.channel.send(
+      `:ring: Sounds like the giveaway is going to be in <#${channelId}>.\n\n` +
       'Now, how many minutes long should the giveaway last?'
+    )
   }
 
   collectResponse (message, collector) {

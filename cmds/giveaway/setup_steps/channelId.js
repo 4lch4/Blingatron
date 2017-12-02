@@ -3,9 +3,11 @@ const SetupStep = require('./SetupStep')
 module.exports = class ChannelId extends SetupStep {
   get stepNum () { return 1 }
 
-  beginningPrompt (input) {
-    return ':ring: Let\'s get this show on the road!\n\n' +
+  async beginningPrompt (message, input) {
+    return message.channel.send(
+      ':ring: Let\'s get this show on the road!\n\n' +
       'Which channel would you like to host the giveaway in?'
+    )
   }
 
   collectResponse (message, collector) {

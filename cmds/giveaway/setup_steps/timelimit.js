@@ -3,11 +3,13 @@ const SetupStep = require('./SetupStep')
 module.exports = class TimeLimit extends SetupStep {
   get stepNum () { return 3 }
 
-  beginningPrompt (timeLimit) {
-    if (!timeLimit) throw new Error('The time limit you entered was invalid.')
+  async beginningPrompt (message, timeLimit) {
+    if (!timeLimit) return Promise.reject(new Error('The time limit you entered was invalid.'))
 
-    return `:ring: This giveaway will last **${timeLimit}** minute(s).\n\n` +
+    return message.channel.send(
+      `:ring: This giveaway will last **${timeLimit}** minute(s).\n\n` +
       'Next, how many winners will there be? (1 - 10)'
+    )
   }
 
   collectResponse (message, collector) {
